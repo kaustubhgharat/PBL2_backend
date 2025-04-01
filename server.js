@@ -35,4 +35,8 @@ app.delete("/patents/:id", (req, res) => {
   res.json({ message: "Patent deleted" });
 });
 
+app.get("/",(req,res)=>{
+  res.json({ message: "Working ek number" });
+})
+
 app.listen(5000, () => console.log("Server running on port 5000"));
