@@ -7,7 +7,7 @@ const Listing = require("./models/listing.js");
 
 
 app.use(cors({
-  origin: 'https://pbl-2.vercel.app', // allow frontend to access
+  origin: "*", 
   methods: ['GET', 'POST', 'DELETE'],
   allowedHeaders: ['Content-Type'],
 }));
