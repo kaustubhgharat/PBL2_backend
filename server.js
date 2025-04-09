@@ -17,6 +17,10 @@ mongoose.connect("mongodb://localhost:27017/pbl", {
 .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 
+app.get("/",(req,res) =>{
+  res.json("hello");
+})
+
 // ✅ Replaces the static sampleListings
 app.get('/patents', async (req, res) => {
   try {
