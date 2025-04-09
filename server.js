@@ -7,16 +7,11 @@ const Listing = require("./models/listing.js");
 const allowedOrigins = ['https://pbl-2.vercel.app'];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: ['https://pbl-2.vercel.app'],
   methods: ['GET', 'POST', 'DELETE'],
   allowedHeaders: ['Content-Type'],
 }));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // Load sample data
@@ -175,25 +170,17 @@ app.delete('/awards/:id', async (req, res) => {
 //about 
 const About = require('./models/about');
 
-// Get all about items
+// GET all about items
 app.get('/about', async (req, res) => {
-  try {
-    const aboutItems = await About.find();
-    res.json(aboutItems);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  const items = await About.find();
+  res.json(items);
 });
 
-// Add a new about item
+// POST a new about item
 app.post('/about', async (req, res) => {
-  try {
-    const newAbout = new About(req.body.listing);
-    await newAbout.save();
-    res.status(201).json(newAbout);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+  const newItem = new About(req.body.listing);
+  await newItem.save();
+  res.status(201).json(newItem);
 });
 
 // Delete an about item
