@@ -5,7 +5,12 @@ const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
 // const allowedOrigins = ['https://pbl-2.vercel.app', 'http://localhost:5173'];
 
-app.use(cors());
+
+app.use(cors({
+  origin: 'https://pbl-2.vercel.app', // allow frontend to access
+  methods: ['GET', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // Load sample data
