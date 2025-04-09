@@ -3,7 +3,9 @@ const app = express();
 const cors = require('cors');
 const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
-app.use(cors());
+app.use(cors({
+  origin: 'https://pbl-2.vercel.app'
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // Load sample data
