@@ -9,7 +9,7 @@ app.use(express.json());
 // Load sample data
 const { data: sampleListings } = require('./init/data');
 
-mongoose.connect("mongodb://localhost:27017/pbl", {
+mongoose.connect("mongodb+srv://gharatkaustubh36:kaustubh@cluster0.5ec9wco.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
