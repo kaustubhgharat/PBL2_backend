@@ -3,11 +3,17 @@ const app = express();
 const cors = require('cors');
 const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
-// const allowedOrigins = ['https://pbl-2.vercel.app', 'http://localhost:5173'];
 
+const allowedOrigins = ['https://pbl-2.vercel.app/'];
 
 app.use(cors({
-  origin: "*", 
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'DELETE'],
   allowedHeaders: ['Content-Type'],
 }));
