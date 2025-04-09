@@ -4,7 +4,7 @@ const cors = require('cors');
 const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
 
-const allowedOrigins = ['https://pbl-2.vercel.app/'];
+const allowedOrigins = ['https://pbl-2.vercel.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
