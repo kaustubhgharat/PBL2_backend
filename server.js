@@ -195,4 +195,58 @@ app.delete("/about/:id", async (req, res) => {
   }
 });
 
+const multer = require("multer");
+const path = require("path");
+
+// Setup multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)); // unique file name
+  },
+});
+
+const upload = multer({ storage });
+
+app.get("/gallery", async (req, res) => {
+  try {
+    const images = await Image.find();
+    res.json(images);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch images" });
+  }
+});
+
+// Serve static files from uploads folder
+app.use("/uploads", express.static("uploads"));
+
+const Image = require("./models/image");
+
+// Upload image
+app.post("/gallery/upload", upload.single("image"), async (req, res) => {
+  try {
+    const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    const newImage = new Image({ url: imageUrl });
+    await newImage.save();
+    res.status(201).json(newImage);
+  } catch (err) {
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+// Delete image from DB (and optionally the filesystem)
+app.delete("/gallery/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await Image.findByIdAndDelete(id);
+    res.status(200).json({ message: "Image deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting image:", err);
+    res.status(500).json({ error: "Failed to delete image" });
+  }
+});
+
+
 app.listen(3000, () => console.log("Server running on port 3000"));
