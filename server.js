@@ -194,21 +194,21 @@ app.delete("/about/:id", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 const multer = require("multer");
 const path = require("path");
 
-// Setup multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, "uploads/"); // folder name
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique file name
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage });
+
 
 app.get("/gallery", async (req, res) => {
   try {
@@ -227,14 +227,20 @@ const Image = require("./models/image");
 // Upload image
 app.post("/gallery/upload", upload.single("image"), async (req, res) => {
   try {
-    const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    const protocol = req.protocol;
+    const host = req.get("host");
+    const imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+
     const newImage = new Image({ url: imageUrl });
     await newImage.save();
+
     res.status(201).json(newImage);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Upload failed" });
   }
 });
+
 
 // Delete image from DB (and optionally the filesystem)
 app.delete("/gallery/:id", async (req, res) => {
