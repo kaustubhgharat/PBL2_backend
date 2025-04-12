@@ -1,12 +1,9 @@
-// backend/models/image.js
 
 const mongoose = require("mongoose");
 
 const imageSchema = new mongoose.Schema({
-  url: {
-    type: String,
-    required: true,
-  },
+  url: String,
+  public_id: String, // add this field
 });
 
 module.exports = mongoose.model("Image", imageSchema);

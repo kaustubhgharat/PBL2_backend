@@ -194,19 +194,29 @@ app.delete("/about/:id", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-const multer = require("multer");
-const path = require("path");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // folder name
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+// Config Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Storage config
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "gallery", // optional folder name
+    allowed_formats: ["jpg", "jpeg", "png"],
   },
 });
 
+const Image = require("./models/image");
 const upload = multer({ storage });
 
 
@@ -219,21 +229,13 @@ app.get("/gallery", async (req, res) => {
   }
 });
 
-// Serve static files from uploads folder
-app.use("/uploads", express.static("uploads"));
-
-const Image = require("./models/image");
-
-// Upload image
 app.post("/gallery/upload", upload.single("image"), async (req, res) => {
   try {
-    const protocol = req.protocol;
-    const host = req.get("host");
-    const imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
-
-    const newImage = new Image({ url: imageUrl });
+    const newImage = new Image({
+      url: req.file.path,
+      public_id: req.file.filename, // Save Cloudinary public_id (filename is public_id in CloudinaryStorage)
+    });
     await newImage.save();
-
     res.status(201).json(newImage);
   } catch (err) {
     console.error(err);
@@ -246,13 +248,24 @@ app.post("/gallery/upload", upload.single("image"), async (req, res) => {
 app.delete("/gallery/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    await Image.findByIdAndDelete(id);
+    const image = await Image.findById(id);
+    if (!image) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(image.public_id);
+
+    // Delete from MongoDB
+    await image.deleteOne();
+
     res.status(200).json({ message: "Image deleted successfully" });
   } catch (err) {
     console.error("Error deleting image:", err);
     res.status(500).json({ error: "Failed to delete image" });
   }
 });
+
 
 
 app.listen(3000, () => console.log("Server running on port 3000"));
