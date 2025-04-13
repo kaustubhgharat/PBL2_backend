@@ -267,23 +267,23 @@ app.delete("/gallery/:id", async (req, res) => {
 });
 
 const router = express.Router();
-const BookChapter = require("./models/bookChapter");
+const BookChapter = require("./models/bookChapter.js");
 
 // Get all book chapters
-router.get("/book-chapters", async (req, res) => {
+router.get("/Bookchapters", async (req, res) => {
   const items = await BookChapter.find();
   res.json(items);
 });
 
 // Add a book chapter
-router.post("/book-chapters", async (req, res) => {
+router.post("/Bookchapters", async (req, res) => {
   const newItem = new BookChapter(req.body);
   await newItem.save();
   res.status(201).json(newItem);
 });
 
 // Delete a book chapter
-router.delete("/book-chapters/:id", async (req, res) => {
+router.delete("/Bookchapters/:id", async (req, res) => {
   try {
     await BookChapter.findByIdAndDelete(req.params.id);
     res.status(204).send();
