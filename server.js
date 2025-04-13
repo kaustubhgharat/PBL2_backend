@@ -270,6 +270,7 @@ const router = express.Router();
 const BookChapter = require("./models/bookChapter.js");
 
 // Get all book chapters
+app.use("/", router);
 router.get("/Bookchapters", async (req, res) => {
   const items = await BookChapter.find();
   res.json(items);
