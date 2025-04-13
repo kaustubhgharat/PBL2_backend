@@ -266,34 +266,4 @@ app.delete("/gallery/:id", async (req, res) => {
   }
 });
 
-const router = express.Router();
-const BookChapter = require("./models/bookChapter.js");
-
-// Get all book chapters
-app.use("/", router);
-router.get("/Bookchapters", async (req, res) => {
-  const items = await BookChapter.find();
-  res.json(items);
-});
-
-// Add a book chapter
-router.post("/Bookchapters", async (req, res) => {
-  const newItem = new BookChapter(req.body);
-  await newItem.save();
-  res.status(201).json(newItem);
-});
-
-// Delete a book chapter
-router.delete("/Bookchapters/:id", async (req, res) => {
-  try {
-    await BookChapter.findByIdAndDelete(req.params.id);
-    res.status(204).send();
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-module.exports = router;
-
-
 app.listen(3000, () => console.log("Server running on port 3000"));
