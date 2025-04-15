@@ -266,4 +266,32 @@ app.delete("/gallery/:id", async (req, res) => {
   }
 });
 
+const BookChapter = require("./models/bookChapter.js");
+
+app.use(express.json());
+
+// ✅ Get all book chapters
+app.get("/book-chapters", async (req, res) => {
+  const items = await BookChapter.find();
+  res.json(items);
+});
+
+// ✅ Add a book chapter
+app.post("/book-chapters", async (req, res) => {
+  const { title, authors, chapter } = req.body;
+  const newChapter = new BookChapter({ title, authors, chapter });
+  await newChapter.save();
+  res.status(201).json(newChapter);
+});
+
+// ✅ Delete a book chapter
+app.delete("/book-chapters/:id", async (req, res) => {
+  try {
+    await BookChapter.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.listen(3000, () => console.log("Server running on port 3000"));
