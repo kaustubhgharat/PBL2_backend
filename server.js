@@ -294,4 +294,41 @@ app.delete("/book-chapters/:id", async (req, res) => {
   }
 });
 
+
+// Import your model
+const PhdStudent = require('./models/phdStudent'); // adjust the path based on your project
+
+// ✅ Get all Ph.D. students
+app.get("/phdstudents", async (req, res) => {
+  try {
+    const students = await PhdStudent.find({});
+    res.json(students);
+  } catch (err) {
+    console.error("Failed to fetch students:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ✅ Add a new Ph.D. student
+app.post("/phdstudents", async (req, res) => {
+  try {
+    const newStudent = new PhdStudent(req.body.listing);
+    await newStudent.save();
+    res.status(201).json(newStudent);
+  } catch (err) {
+    console.error("Failed to save student:", err);
+    res.status(500).json({ error: "Failed to save" });
+  }
+});
+
+// ✅ Delete a Ph.D. student
+app.delete("/phdstudents/:id", async (req, res) => {
+  try {
+    await PhdStudent.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete" });
+  }
+});
+
 app.listen(3000, () => console.log("Server running on port 3000"));
