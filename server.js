@@ -10,6 +10,8 @@ require("dotenv").config();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.json({ limit: "200mb" }));
+app.use(express.urlencoded({ limit: "200mb", extended: true }));
 // Load sample data
 // const { data: sampleListings } = require("./init/data");
 
@@ -235,7 +237,12 @@ const storage = new CloudinaryStorage({
 });
 
 const Image = require("./models/image");
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 200 * 1024 * 1024,    // ← 200 MB max per file
+  },
+});
 
 
 app.get("/gallery", async (req, res) => {
@@ -269,8 +276,9 @@ app.post(
       await newItem.save();
       res.status(201).json(newItem);
     } catch (err) {
-      console.error("Upload failed:", err);
-      res.status(500).json({ error: "Upload failed" });
+      console.error("Upload failed:", err.message);
+      // Send the real message back so you can see what’s going on
+      res.status(500).json({ error: err.message });
     }
   }
 );
@@ -294,8 +302,8 @@ app.delete("/gallery/:id", async (req, res) => {
 
     res.status(200).json({ message: "Image deleted successfully" });
   } catch (err) {
-    console.error("Error deleting image:", err);
-    res.status(500).json({ error: "Failed to delete image" });
+    console.error("Error deleting image:", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
