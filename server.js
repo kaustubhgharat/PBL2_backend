@@ -3,6 +3,8 @@ const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
+require("dotenv").config();
+
 
 // const allowedOrigins = ["https://pbl-2.vercel.app"];
 
@@ -61,6 +63,16 @@ app.delete("/patents/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete" });
   }
 });
+app.put("/patents/:id", async (req, res) => {
+  try {
+    const updatedListing = await Listing.findByIdAndUpdate(req.params.id, req.body.listing, { new: true });
+    res.status(200).json(updatedListing);
+  } catch (err) {
+    console.error("Failed to update listing:", err);
+    res.status(500).json({ error: "Failed to update" });
+  }
+});
+
 //talks
 const Talk = require("./models/talk");
 
@@ -209,10 +221,16 @@ cloudinary.config({
 
 // Storage config
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "gallery", // optional folder name
-    allowed_formats: ["jpg", "jpeg", "png"],
+  cloudinary,
+  params: async (req, file) => {
+    const isVideo = file.mimetype.startsWith("video/");
+    return {
+      folder: "gallery",
+      resource_type: isVideo ? "video" : "image",
+      allowed_formats: isVideo
+        ? ["mp4", "webm", "mov", "avi"]
+        : ["jpg", "jpeg", "png"],
+    };
   },
 });
 
@@ -229,19 +247,34 @@ app.get("/gallery", async (req, res) => {
   }
 });
 
-app.post("/gallery/upload", upload.single("image"), async (req, res) => {
-  try {
-    const newImage = new Image({
-      url: req.file.path,
-      public_id: req.file.filename, // Save Cloudinary public_id (filename is public_id in CloudinaryStorage)
-    });
-    await newImage.save();
-    res.status(201).json(newImage);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Upload failed" });
+app.post(
+  "/gallery/upload",
+  upload.single("image"),  // ← field name “image”
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      // Multer-Storage-Cloudinary sets:
+      //   req.file.path     = secure_url
+      //   req.file.filename = public_id
+      const isVideo = req.file.mimetype.startsWith("video/");
+      const newItem = new Image({
+        url: req.file.path,
+        public_id: req.file.filename,
+        type: isVideo ? "video" : "image",
+      });
+
+      await newItem.save();
+      res.status(201).json(newItem);
+    } catch (err) {
+      console.error("Upload failed:", err);
+      res.status(500).json({ error: "Upload failed" });
+    }
   }
-});
+);
+
 
 
 // Delete image from DB (and optionally the filesystem)
